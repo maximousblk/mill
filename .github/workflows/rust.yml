@@ -1,0 +1,128 @@
+name: Rust
+
+on:
+  workflow_dispatch:
+    inputs:
+      repo:
+        description: Repository
+        required: true
+      ref:
+        description: Branch or Tag
+        required: false
+        default: 'master'
+      bin:
+        description: Binary Name
+        required: true
+      toolchain:
+        description: Rust Version
+        required: false
+        default: 'stable'
+      args:
+        description: Build Options
+        required: false
+        default: '--locked --release'
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    name: build / ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+
+    outputs:
+      commit: ${{ steps.commit.outputs.hash }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-20.04
+          - target: aarch64-unknown-linux-gnu
+            os: ubuntu-20.04
+
+          - target: x86_64-pc-windows-msvc
+            os: windows-2019
+          - target: aarch64-pc-windows-msvc
+            os: windows-2019
+
+          - target: x86_64-apple-darwin
+            os: macos-11.0
+          - target: aarch64-apple-darwin
+            os: macos-11.0
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.inputs.ref }}
+          repository: ${{ github.event.inputs.repo }}
+          submodules: true
+          fetch-depth: 2
+
+      - name: Get commit hash # For release notes
+        id: commit
+        run: echo "::set-output name=hash::$(git rev-parse --short HEAD)"
+
+      - name: Setup Rust (${{ github.event.inputs.toolchain }})
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ github.event.inputs.toolchain }}
+          target: ${{ matrix.target }}
+          override: true
+
+      - name: Build ${{ github.event.inputs.bin }}
+        uses: actions-rs/cargo@v1
+        with:
+          use-cross: true
+          command: build
+          args: --target ${{ matrix.target }} ${{ github.event.inputs.args }}
+
+      - name: Zip unix build
+        if: runner.os != 'Windows'
+        working-directory: target/${{ matrix.target }}/release
+        run: zip -r ${{ github.event.inputs.bin }}-${{ matrix.target }}.zip ${{ github.event.inputs.bin }}
+
+      - name: Zip windows build
+        if: runner.os == 'Windows'
+        working-directory: target/${{ matrix.target }}/release
+        run: Compress-Archive -Path ${{ github.event.inputs.bin }}.exe -DestinationPath ${{ github.event.inputs.bin }}-${{ matrix.target }}.zip
+
+      - name: Upload Builds
+        uses: actions/upload-artifact@v2
+        with:
+          name: release
+          path: target/${{ matrix.target }}/release/${{ github.event.inputs.bin }}-${{ matrix.target }}.zip
+          retention-days: 1
+
+  release:
+    if: always()
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Download Builds
+        uses: actions/download-artifact@v2
+
+      - name: Prep Release body
+        working-directory: release
+        run: |
+          echo '${{ github.event.inputs.repo }}@${{ needs.build.outputs.commit }}' > ../body.md
+          echo -e '```\nsha1sum\n' >> ../body.md
+          for f in $(ls); do sha1sum $f; done | tee -a ../body.md
+          echo '```' >> ../body.md
+
+      - name: Release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ github.event.inputs.repo }}/${{ needs.build.outputs.commit }}
+          name: ${{ github.event.inputs.bin }}@${{ github.event.inputs.ref }}
+          prerelease: false
+          allowUpdates: true
+          replacesArtifacts: true
+          artifacts: 'release/*'
+          bodyFile: 'body.md'
+          token: ${{ secrets.GITHUB_TOKEN }}
