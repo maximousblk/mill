@@ -27,7 +27,7 @@ env:
 
 jobs:
   build:
-    name: build / ${{ matrix.target }}
+    name: ${{ matrix.target }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
 
@@ -76,7 +76,7 @@ jobs:
       - name: Build ${{ github.event.inputs.bin }}
         uses: actions-rs/cargo@v1
         with:
-          use-cross: true
+          use-cross: ${{ !contains(matrix.target, 'x86_64') }}
           command: build
           args: --target ${{ matrix.target }} ${{ github.event.inputs.args }}
 
@@ -107,13 +107,13 @@ jobs:
       - name: Download Builds
         uses: actions/download-artifact@v2
 
-      - name: Prep Release body
+      - name: Prep Release Notes
         working-directory: release
         run: |
-          echo '${{ github.event.inputs.repo }}@${{ needs.build.outputs.commit }}' > ../body.md
-          echo -e '```\nsha1sum\n' >> ../body.md
-          for f in $(ls); do sha1sum $f; done | tee -a ../body.md
-          echo '```' >> ../body.md
+          echo 'source: ${{ github.event.inputs.repo }}@${{ needs.build.outputs.commit }}' | tee ../notes.md
+          echo -e '\n```sh\necho $hash  $filename | sha1sum -c\n' | tee -a ../notes.md
+          sha1sum $(ls) | tee -a ../notes.md
+          echo '```' | tee -a ../notes.md
 
       - name: Release
         uses: ncipollo/release-action@v1
@@ -124,5 +124,5 @@ jobs:
           allowUpdates: true
           replacesArtifacts: true
           artifacts: 'release/*'
-          bodyFile: 'body.md'
+          bodyFile: 'notes.md'
           token: ${{ secrets.GITHUB_TOKEN }}
