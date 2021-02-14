@@ -21,6 +21,12 @@ on:
         description: Build Options
         required: false
         default: '--locked --release'
+      target:
+        description: Custom Target
+        required: false
+      os:
+        description: Custom OS
+        required: false
 
 env:
   CARGO_TERM_COLOR: always
@@ -52,6 +58,10 @@ jobs:
             os: macos-11.0
           - target: aarch64-apple-darwin
             os: macos-11.0
+
+            # custom target and os
+          - target: ${{ github.event.inputs.target }}
+            os: ${{ github.event.inputs.os }}
 
     steps:
       - name: Checkout repo
