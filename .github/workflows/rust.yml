@@ -82,6 +82,7 @@ jobs:
           toolchain: ${{ github.event.inputs.toolchain }}
           target: ${{ matrix.target }}
           override: true
+          default: true
 
       - name: Build ${{ github.event.inputs.bin }}
         uses: actions-rs/cargo@v1
