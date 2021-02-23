@@ -21,12 +21,12 @@ on:
         description: Build Options
         required: false
         default: '--locked --release'
-      target:
-        description: Custom Target
-        required: false
-      os:
-        description: Custom OS
-        required: false
+#       target:
+#         description: Custom Target
+#         required: false
+#       os:
+#         description: Custom OS
+#         required: false
 
 env:
   CARGO_TERM_COLOR: always
