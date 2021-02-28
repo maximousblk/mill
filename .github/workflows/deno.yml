@@ -24,6 +24,7 @@ on:
 
 jobs:
   compile:
+    name: compile / ${{ matrix.target }}
     runs-on: ubuntu-latest
 
     strategy:
@@ -40,7 +41,7 @@ jobs:
 
       - name: get tag
         id: tag
-        run: echo "::set-output name=time::$(deno eval -p Date.now())"
+        run: echo "::set-output name=time::$(deno eval -p 'Date.now()')"
 
       - name: Compile
         run: deno compile ${{ github.event.inputs.perms }} ${{ github.event.inputs.args }} --target ${{ matrix.target }} --output ${{ github.event.inputs.bin }} ${{ github.event.inputs.entry }}
