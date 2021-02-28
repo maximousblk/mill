@@ -44,7 +44,7 @@ jobs:
         run: echo "::set-output name=time::$(deno eval -p 'Date.now()')"
 
       - name: Compile
-        run: deno compile ${{ github.event.inputs.perms }} ${{ github.event.inputs.args }} --target ${{ matrix.target }} --output ${{ github.event.inputs.bin }} ${{ github.event.inputs.entry }}
+        run: deno compile ${{ github.event.inputs.perms }} ${{ github.event.inputs.args }} --target ${{ matrix.target }} --output ${{ github.event.inputs.bin }}${{ contains(matrix.target, 'windows') && '.exe' || ''}} ${{ github.event.inputs.entry }}
 
       - name: zip binary
         run: zip -r ${{ github.event.inputs.bin }}-${{ matrix.target }}.zip ${{ github.event.inputs.bin }}${{ contains(matrix.target, 'windows') && '.exe' || ''}}
