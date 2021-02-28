@@ -2,7 +2,7 @@
 
 Set of GitHub Actions for me to build my favorite projects.
 
-I had this set up in a private repo earlier but even though I rarely used it, long build times for some projects drained my 2000 minute quota very fast. So I decided to make this more presentable and make it public to escape the usage limit.
+I had this set up in a private repo earlier but even though I rarely used it, long build times for some projects drained the 2000 minute quota very fast. So I decided to make this more presentable and make it public to ~~cheat~~ avoid the usage limit.
 
 ## Usage
 
@@ -18,8 +18,8 @@ All the builds will be available as releases.
 List supported Languages:
 
 - [x] Rust
+- [x] Deno
 - [ ] Go
-- [ ] Deno
 - [ ] Node (Electron)
 - [ ] Julia
 - [ ] C
