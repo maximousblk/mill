@@ -47,7 +47,7 @@ jobs:
         run: deno compile ${{ github.event.inputs.perms }} ${{ github.event.inputs.args }} --target ${{ matrix.target }} --output ${{ github.event.inputs.bin }} ${{ github.event.inputs.entry }}
 
       - name: zip binary
-        run: zip -r ${{ github.event.inputs.bin }}-${{ matrix.target }}.zip ${{ github.event.inputs.bin }}${{ contains(matrix.target, 'windows' && '.exe' || '')}}
+        run: zip -r ${{ github.event.inputs.bin }}-${{ matrix.target }}.zip ${{ github.event.inputs.bin }}${{ contains(matrix.target, 'windows') && '.exe' || ''}}
 
       - name: Upload Builds
         uses: actions/upload-artifact@v2
