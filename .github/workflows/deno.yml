@@ -1,0 +1,86 @@
+name: Deno
+
+on:
+  workflow_dispatch:
+    inputs:
+      entry:
+        description: Entry File
+        required: true
+      bin:
+        description: Binary Name
+        required: true
+      deno:
+        description: Deno Version
+        required: true
+        default: 'latest'
+      perms:
+        description: Permission Flags
+        required: false
+        default: '--allow-all'
+      args:
+        description: Build Options
+        required: false
+        default: '--lite --unstable'
+
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        target: [x86_64-unknown-linux-gnu, x86_64-pc-windows-msvc, x86_64-apple-darwin, aarch64-apple-darwin]
+    outputs:
+      tag: ${{ steps.tag.outputs.time }}
+
+    steps:
+      - name: Setup Deno
+        uses: maximousblk/setup-deno@latest
+        with:
+          version: ${{ github.event.inputs.deno }}
+
+      - name: get tag
+        id: tag
+        run: echo "::set-output name=time::$(deno eval -p Date.now())"
+
+      - name: Compile
+        run: deno compile ${{ github.event.inputs.perms }} ${{ github.event.inputs.args }} --target ${{ matrix.target }} --output ${{ github.event.inputs.bin }} ${{ github.event.inputs.entry }}
+
+      - name: zip binary
+        run: zip -r ${{ github.event.inputs.bin }}-${{ matrix.target }}.zip ${{ github.event.inputs.bin }}${{ contains(matrix.target, 'windows' && '.exe' || '')}}
+
+      - name: Upload Builds
+        uses: actions/upload-artifact@v2
+        with:
+          name: release
+          path: ${{ github.event.inputs.bin }}-${{ matrix.target }}.zip
+          retention-days: 1
+
+  release:
+    if: always()
+    needs: compile
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Download Builds
+        uses: actions/download-artifact@v2
+
+      - name: Prep Release Notes
+        working-directory: release
+        run: |
+          echo 'source: ${{ github.event.inputs.entry }}' | tee ../notes.md
+          echo -e '\n```sh\necho $hash  $filename | sha1sum -c\n' | tee -a ../notes.md
+          sha1sum $(ls) | tee -a ../notes.md
+          echo '```' | tee -a ../notes.md
+
+      - name: Release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: deno.compile/${{ github.event.inputs.bin }}/${{ needs.compile.outputs.tag }}
+          name: ${{ github.event.inputs.bin }}
+          prerelease: false
+          allowUpdates: true
+          replacesArtifacts: true
+          artifacts: 'release/*'
+          bodyFile: 'notes.md'
+          token: ${{ secrets.GITHUB_TOKEN }}
