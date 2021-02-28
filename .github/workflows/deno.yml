@@ -41,7 +41,7 @@ jobs:
 
       - name: get tag
         id: tag
-        run: echo "::set-output name=time::$(deno eval -p 'Date.now()')"
+        run: echo "::set-output name=time::$(NO_COLOR=1 deno eval -p 'Date.now()')"
 
       - name: Compile
         run: deno compile ${{ github.event.inputs.perms }} ${{ github.event.inputs.args }} --target ${{ matrix.target }} --output ${{ github.event.inputs.bin }}${{ contains(matrix.target, 'windows') && '.exe' || ''}} ${{ github.event.inputs.entry }}
