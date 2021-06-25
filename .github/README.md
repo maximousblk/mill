@@ -18,10 +18,9 @@ All the builds will be available as releases.
 List supported Languages:
 
 - [x] Rust
-- [x] Deno
 - [x] Go
+- [x] Deno
 - [ ] Node
-- [ ] Julia
 - [ ] C
 - [ ] C++
 - [ ] Run MakeFile
