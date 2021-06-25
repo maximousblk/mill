@@ -50,7 +50,7 @@ jobs:
           version: latest
           args: release ${{ github.event.inputs.args }}
 
-      - name: Get commit hash # For release notes
+      - name: Get commit hash
         id: commit
         run: echo "::set-output name=hash::$(git rev-parse --short HEAD)"
 
