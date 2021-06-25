@@ -56,7 +56,7 @@ jobs:
         run: |
           echo 'source: ${{ github.event.inputs.repo }}@${{ steps.commit.outputs.hash }}' | tee ../RELEASE.md
           echo -e '\n```sh\necho $hash  $filename | sha1sum -c\n' | tee -a ../RELEASE.md
-          sha1sum $(ls) | tee -a ../RELEASE.md
+          sha1sum $(ls *.zip) | tee -a ../RELEASE.md
           echo '```' | tee -a ../RELEASE.md
 
       - name: Release
@@ -67,6 +67,6 @@ jobs:
           prerelease: false
           allowUpdates: true
           replacesArtifacts: true
-          artifacts: 'dist/*'
+          artifacts: 'dist/*.zip'
           bodyFile: 'RELEASE.md'
           token: ${{ github.token }}
