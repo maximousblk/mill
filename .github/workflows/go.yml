@@ -40,6 +40,9 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: ${{ github.event.inputs.go }}
+          
+      - name: Setup GoReleaser Config
+        run: curl -fsSL https://gist.new/raw/bde968b5a4ae4eb8e52f98ea9ac1eb70 > .goreleaser.yml
 
       - name: Build
         uses: goreleaser/goreleaser-action@v2
@@ -56,7 +59,7 @@ jobs:
         run: |
           echo 'source: ${{ github.event.inputs.repo }}@${{ steps.commit.outputs.hash }}' | tee ../RELEASE.md
           echo -e '\n```sh\necho $hash  $filename | sha1sum -c\n' | tee -a ../RELEASE.md
-          sha1sum $(ls *.zip) | tee -a ../RELEASE.md
+          cat checksum.txt | tee -a ../RELEASE.md
           echo '```' | tee -a ../RELEASE.md
 
       - name: Release
@@ -67,6 +70,6 @@ jobs:
           prerelease: false
           allowUpdates: true
           replacesArtifacts: true
-          artifacts: 'dist/*.zip'
+          artifacts: 'dist/*.zip,dist/checksums.txt'
           bodyFile: 'RELEASE.md'
           token: ${{ github.token }}
