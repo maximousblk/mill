@@ -20,7 +20,7 @@ List supported Languages:
 - [x] Rust
 - [x] Deno
 - [x] Go
-- [ ] Node (Electron)
+- [ ] Node
 - [ ] Julia
 - [ ] C
 - [ ] C++
