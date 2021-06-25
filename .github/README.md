@@ -19,7 +19,7 @@ List supported Languages:
 
 - [x] Rust
 - [x] Deno
-- [ ] Go
+- [x] Go
 - [ ] Node (Electron)
 - [ ] Julia
 - [ ] C
