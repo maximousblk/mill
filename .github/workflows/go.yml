@@ -10,6 +10,10 @@ on:
         description: Branch or Tag
         required: false
         default: 'master'
+      stable:
+        description: Go Stable
+        required: false
+        default: 'true'
       go:
         description: Go Version
         required: false
@@ -39,6 +43,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
+          stable: ${{ github.event.inputs.stable }}
           go-version: ${{ github.event.inputs.go }}
           
       - name: Setup GoReleaser Config
