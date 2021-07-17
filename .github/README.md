@@ -23,7 +23,7 @@ List supported Languages:
 - [ ] Node
 - [ ] C
 - [ ] C++
-- [ ] Run MakeFile
+- [ ] Run Build Command
 
 Some projects may not build properly if they require a special build process or environment.
 
