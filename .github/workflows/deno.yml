@@ -20,7 +20,7 @@ on:
       args:
         description: Build Options
         required: false
-        default: '--lite --unstable'
+        default: '--unstable'
 
 jobs:
   compile:
@@ -38,7 +38,7 @@ jobs:
       - name: Setup Deno
         uses: maximousblk/setup-deno@latest
         with:
-          version: ${{ github.event.inputs.deno }}
+          deno-version: ${{ github.event.inputs.deno }}
 
       - name: get tag
         id: tag
