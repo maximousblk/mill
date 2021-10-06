@@ -17,7 +17,6 @@ on:
       go:
         description: Go Version
         required: false
-        default: '1.16'
       args:
         description: GoReleaser Options
         required: false
@@ -26,10 +25,6 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
-
-    env:
-      GITHUB_TOKEN: ${{ github.token }}
-      GORELEASER_CURRENT_TAG: ${{ github.event.inputs.ref }}
 
     steps:
       - name: Checkout
@@ -45,7 +40,11 @@ jobs:
         with:
           stable: ${{ github.event.inputs.stable }}
           go-version: ${{ github.event.inputs.go }}
-          
+
+      - name: Get release tag
+        id: release
+        run: echo "::set-output name=tag::$(echo `git describe --tags --abbrev=0 || echo 0.0`-`git rev-list --all --count`-`git rev-parse --short HEAD`)"
+
       - name: Setup GoReleaser Config
         run: curl -fsSL https://gist.new/raw/bde968b5a4ae4eb8e52f98ea9ac1eb70 > .goreleaser.yml
 
@@ -54,15 +53,13 @@ jobs:
         with:
           version: latest
           args: release ${{ github.event.inputs.args }}
-
-      - name: Get commit hash
-        id: commit
-        run: echo "::set-output name=hash::$(git rev-parse --short HEAD)"
+        env:
+          GORELEASER_CURRENT_TAG: ${{ steps.release.outputs.tag }}
 
       - name: Prep Release Notes
         working-directory: dist
         run: |
-          echo 'source: ${{ github.event.inputs.repo }}@${{ steps.commit.outputs.hash }}' | tee ../RELEASE.md
+          echo 'source: ${{ github.event.inputs.repo }}@${{ steps.release.outputs.tag }}' | tee ../RELEASE.md
           echo -e '\n```sh\necho $hash  $filename | sha1sum -c\n' | tee -a ../RELEASE.md
           cat checksums.txt | tee -a ../RELEASE.md
           echo '```' | tee -a ../RELEASE.md
@@ -70,7 +67,7 @@ jobs:
       - name: Release
         uses: ncipollo/release-action@v1
         with:
-          tag: ${{ github.event.inputs.repo }}/${{ steps.commit.outputs.hash }}
+          tag: ${{ github.event.inputs.repo }}/${{ steps.release.outputs.tag }}
           name: ${{ github.event.inputs.repo }}@${{ github.event.inputs.ref }}
           prerelease: false
           allowUpdates: true
