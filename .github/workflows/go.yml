@@ -33,7 +33,6 @@ jobs:
           ref: ${{ github.event.inputs.ref }}
           repository: ${{ github.event.inputs.repo }}
           submodules: true
-          fetch-depth: 2
 
       - name: Set up Go
         uses: actions/setup-go@v2
