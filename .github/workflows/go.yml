@@ -33,7 +33,7 @@ jobs:
           ref: ${{ github.event.inputs.ref }}
           repository: ${{ github.event.inputs.repo }}
           submodules: true
-          fetch-depth: 0
+          fetch-depth: 1
 
       - name: Set up Go
         uses: actions/setup-go@v2
@@ -43,7 +43,7 @@ jobs:
 
       - name: Get release tag
         id: release
-        run: echo "::set-output name=tag::$(echo `git describe --tags --abbrev=0 || echo 0.0`-`git rev-list --all --count`-`git rev-parse --short HEAD`)"
+        run: echo "::set-output name=tag::$(echo `git describe --tags --abbrev=0 || echo 0.0`-`git rev-parse --short HEAD`)"
 
       - name: Setup GoReleaser Config
         run: curl -fsSL https://gist.new/raw/bde968b5a4ae4eb8e52f98ea9ac1eb70 > .goreleaser.yml
