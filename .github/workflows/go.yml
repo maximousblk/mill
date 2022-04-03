@@ -32,7 +32,7 @@ jobs:
         with:
           ref: ${{ github.event.inputs.ref }}
           repository: ${{ github.event.inputs.repo }}
-          submodules: true
+          submodules: recursive
           fetch-depth: 1
 
       - name: Set up Go
