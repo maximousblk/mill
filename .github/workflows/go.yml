@@ -25,9 +25,6 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
-    
-    env:
-      GO111MODULE: auto
 
     steps:
       - name: Checkout
@@ -50,6 +47,9 @@ jobs:
 
       - name: Setup GoReleaser Config
         run: curl -fsSL https://gist.new/raw/bde968b5a4ae4eb8e52f98ea9ac1eb70 > .goreleaser.yml
+
+      - name: Initialize Go Modules
+        run: go mod init
 
       - name: Build
         uses: goreleaser/goreleaser-action@v2
