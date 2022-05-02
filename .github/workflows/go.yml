@@ -25,6 +25,9 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    
+    env:
+      GO111MODULE: auto
 
     steps:
       - name: Checkout
