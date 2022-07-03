@@ -51,8 +51,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ['${{github.event.inputs.os || "ubuntu-22.04"}}']
-        target: ['${{github.event.inputs.target || "x86_64-unknown-linux-gnu"}}']
+        os: [github.event.inputs.os || 'ubuntu-22.04']
+        target: [github.event.inputs.target || 'x86_64-unknown-linux-gnu']
         include:
           - target: x86_64-unknown-linux-gnu
             os: ubuntu-22.04
