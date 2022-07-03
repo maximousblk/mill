@@ -66,7 +66,7 @@ jobs:
         run: ${{ github.event.inputs.prep }}
 
       - name: Build
-        uses: goreleaser/goreleaser-action@v2
+        uses: goreleaser/goreleaser-action@v3
         with:
           version: latest
           args: release ${{ github.event.inputs.args }}
