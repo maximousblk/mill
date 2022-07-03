@@ -62,7 +62,7 @@ jobs:
 
       - name: Pre-Build Steps
         id: prep
-        if: ${{ github.event.inputs.prepif }}
+        if: github.event.inputs.prepif
         run: ${{ github.event.inputs.prep }}
 
       - name: Build
