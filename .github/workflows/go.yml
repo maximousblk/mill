@@ -10,13 +10,14 @@ on:
         description: Branch or Tag
         required: false
         default: 'main'
-      stable:
-        description: Go Stable
-        required: false
-        default: 'true'
       go:
         description: Go Version
-        required: false
+        required: true
+        default: 'go.mod'
+      config:
+        description: GoReleaser Config (URL)
+        required: true
+        default: 'https://gist.new/raw/bde968b5a4ae4eb8e52f98ea9ac1eb70'
       args:
         description: GoReleaser Options
         required: false
@@ -44,17 +45,17 @@ jobs:
           fetch-depth: 1
 
       - name: Set up Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v3
         with:
-          stable: ${{ github.event.inputs.stable }}
-          go-version: ${{ github.event.inputs.go }}
+          go-version: ${{ !endsWith(github.event.inputs.go, '.mod') && github.event.inputs.go || null }}
+          go-version-file: ${{ endsWith(github.event.inputs.go, '.mod') && github.event.inputs.go || null }}
 
       - name: Get release tag
         id: release
         run: echo "::set-output name=tag::$(echo `git describe --tags --abbrev=0 || echo 0.0`-`git rev-parse --short HEAD`)"
 
       - name: Setup GoReleaser Config
-        run: curl -fsSL https://gist.new/raw/bde968b5a4ae4eb8e52f98ea9ac1eb70 > .goreleaser.yml
+        run: curl -fsSL ${{ github.event.inputs.config }} > .goreleaser.yml
 
       - name: Initialize Go Modules
         run: go mod init
