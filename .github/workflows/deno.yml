@@ -25,14 +25,6 @@ on:
         description: Conditions for Pre-Build Steps
         required: false
         default: 'false'
-      post:
-        description: Post-Build Steps
-        required: false
-        default: 'echo "nothing to do"'
-      postif:
-        description: Conditions for Post-Build Steps
-        required: false
-        default: 'false'
 
 jobs:
   compile:
@@ -63,11 +55,6 @@ jobs:
 
       - name: Compile
         run: deno compile ${{ github.event.inputs.perms }} ${{ github.event.inputs.args }} --target ${{ matrix.target }} --output ${{ github.event.inputs.bin }} ${{ github.event.inputs.entry }}
-
-      - name: Post-Build Steps
-        id: post
-        if: ${{ github.event.inputs.postif }}
-        run: ${{ github.event.inputs.post }}
 
       - name: zip binary
         run: ls -a && zip -r ${{ github.event.inputs.bin }}-${{ matrix.target }}.zip ./${{ github.event.inputs.bin }}*

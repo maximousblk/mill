@@ -29,14 +29,6 @@ on:
         description: Conditions for Pre-Build Steps
         required: false
         default: 'false'
-      post:
-        description: Post-Build Steps
-        required: false
-        default: 'echo "nothing to do"'
-      postif:
-        description: Conditions for Post-Build Steps
-        required: false
-        default: 'false'
 
 jobs:
   release:
@@ -79,11 +71,6 @@ jobs:
           args: release ${{ github.event.inputs.args }}
         env:
           GORELEASER_CURRENT_TAG: ${{ steps.release.outputs.tag }}
-
-      - name: Post-Build Steps
-        id: post
-        if: ${{ github.event.inputs.postif }}
-        run: ${{ github.event.inputs.post }}
 
       - name: Prep Release Notes
         working-directory: dist
