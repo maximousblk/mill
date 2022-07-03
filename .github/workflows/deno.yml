@@ -73,7 +73,7 @@ jobs:
         run: ls -a && zip -r ${{ github.event.inputs.bin }}-${{ matrix.target }}.zip ./${{ github.event.inputs.bin }}*
 
       - name: Upload Builds
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: release
           path: ${{ github.event.inputs.bin }}-${{ matrix.target }}.zip
