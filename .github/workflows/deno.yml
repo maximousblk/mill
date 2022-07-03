@@ -25,7 +25,7 @@ on:
 jobs:
   compile:
     name: compile / ${{ matrix.target }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     strategy:
       fail-fast: false
@@ -60,7 +60,7 @@ jobs:
   release:
     if: always()
     needs: compile
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 10
 
     steps:

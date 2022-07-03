@@ -45,19 +45,19 @@ jobs:
       matrix:
         include:
           - target: x86_64-unknown-linux-gnu
-            os: ubuntu-20.04
+            os: ubuntu-22.04
           - target: aarch64-unknown-linux-gnu
-            os: ubuntu-20.04
+            os: ubuntu-22.04
 
           - target: x86_64-pc-windows-msvc
-            os: windows-2019
+            os: windows-2022
           - target: aarch64-pc-windows-msvc
-            os: windows-2019
+            os: windows-2022
 
           - target: x86_64-apple-darwin
-            os: macos-11.0
+            os: macos-12
           - target: aarch64-apple-darwin
-            os: macos-11.0
+            os: macos-12
 
     steps:
       - name: Checkout repo
@@ -107,7 +107,7 @@ jobs:
   release:
     if: always()
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 10
 
     steps:
