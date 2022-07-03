@@ -9,7 +9,7 @@ on:
       ref:
         description: Branch or Tag
         required: false
-        default: 'master'
+        default: 'main'
       stable:
         description: Go Stable
         required: false
@@ -21,6 +21,22 @@ on:
         description: GoReleaser Options
         required: false
         default: '--snapshot --rm-dist'
+      prep:
+        description: Pre-Build Steps
+        required: false
+        default: 'echo "nothing to do"'
+      prepif:
+        description: Conditions for Pre-Build Steps
+        required: false
+        default: 'false'
+      post:
+        description: Post-Build Steps
+        required: false
+        default: 'echo "nothing to do"'
+      postif:
+        description: Conditions for Post-Build Steps
+        required: false
+        default: 'false'
 
 jobs:
   release:
@@ -51,6 +67,11 @@ jobs:
       - name: Initialize Go Modules
         run: go mod init
 
+      - name: Pre-Build Steps
+        id: prep
+        if: ${{ github.event.inputs.prepif }}
+        run: ${{ github.event.inputs.prep }}
+
       - name: Build
         uses: goreleaser/goreleaser-action@v2
         with:
@@ -58,6 +79,11 @@ jobs:
           args: release ${{ github.event.inputs.args }}
         env:
           GORELEASER_CURRENT_TAG: ${{ steps.release.outputs.tag }}
+
+      - name: Post-Build Steps
+        id: post
+        if: ${{ github.event.inputs.postif }}
+        run: ${{ github.event.inputs.post }}
 
       - name: Prep Release Notes
         working-directory: dist

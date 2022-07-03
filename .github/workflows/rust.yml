@@ -9,7 +9,7 @@ on:
       ref:
         description: Branch or Tag
         required: false
-        default: 'master'
+        default: 'main'
       bin:
         description: Binary Name
         required: true
@@ -21,6 +21,22 @@ on:
         description: Build Options
         required: false
         default: '--locked --release'
+      prep:
+        description: Pre-Build Steps
+        required: false
+        default: 'echo "nothing to do"'
+      prepif:
+        description: Conditions for Pre-Build Steps
+        required: false
+        default: 'false'
+      post:
+        description: Post-Build Steps
+        required: false
+        default: 'echo "nothing to do"'
+      postif:
+        description: Conditions for Post-Build Steps
+        required: false
+        default: 'false'
       target:
         description: Custom Target
         required: false
@@ -82,12 +98,22 @@ jobs:
           override: true
           default: true
 
+      - name: Pre-Build Steps
+        id: prep
+        if: ${{ github.event.inputs.prepif }}
+        run: ${{ github.event.inputs.prep }}
+
       - name: Build ${{ github.event.inputs.bin }}
         uses: actions-rs/cargo@v1
         with:
           use-cross: ${{ !contains(matrix.target, 'x86_64') }}
           command: build
           args: --target ${{ matrix.target }} ${{ github.event.inputs.args }}
+
+      - name: Post-Build Steps
+        id: post
+        if: ${{ github.event.inputs.postif }}
+        run: ${{ github.event.inputs.post }}
 
       - name: Zip unix build
         if: runner.os != 'Windows'
