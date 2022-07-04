@@ -25,10 +25,9 @@ on:
         description: Pre-Build Steps
         required: false
         default: 'echo "nothing to do"'
-      prepif:
-        description: Conditions for Pre-Build Steps
+      preptargets:
+        description: Targets for Pre-Build Steps
         required: false
-        default: 'false'
       target:
         description: Custom Target
         required: false
@@ -92,7 +91,7 @@ jobs:
 
       - name: Pre-Build Steps
         id: prep
-        if: ${{ fromJSON(github.event.inputs.prepif) }}
+        if: contains(github.event.inputs.preptargets, matrix.target)
         run: ${{ github.event.inputs.prep }}
 
       - name: Build ${{ github.event.inputs.bin }}

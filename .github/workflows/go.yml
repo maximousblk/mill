@@ -26,10 +26,6 @@ on:
         description: Pre-Build Steps
         required: false
         default: 'echo "nothing to do"'
-      prepif:
-        description: Conditions for Pre-Build Steps
-        required: false
-        default: 'false'
 
 jobs:
   release:
@@ -62,7 +58,7 @@ jobs:
 
       - name: Pre-Build Steps
         id: prep
-        if: ${{ fromJSON(github.event.inputs.prepif) }}
+        if: github.event.inputs.prep
         run: ${{ github.event.inputs.prep }}
 
       - name: Build
