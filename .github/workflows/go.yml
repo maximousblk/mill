@@ -53,9 +53,6 @@ jobs:
       - name: Setup GoReleaser Config
         run: curl -fsSL ${{ github.event.inputs.config }} > .goreleaser.yml
 
-      - name: Initialize Go Modules
-        run: go mod init
-
       - name: Pre-Build Steps
         id: prep
         if: github.event.inputs.prep
