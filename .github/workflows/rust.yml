@@ -141,6 +141,7 @@ jobs:
         with:
           tag: ${{ github.event.inputs.repo }}/${{ needs.build.outputs.commit }}
           name: ${{ github.event.inputs.bin }}@${{ github.event.inputs.ref }}
+          makeLatest: true
           prerelease: false
           allowUpdates: true
           replacesArtifacts: true

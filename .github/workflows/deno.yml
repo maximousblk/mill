@@ -88,6 +88,7 @@ jobs:
         with:
           tag: deno.compile/${{ github.event.inputs.bin }}/${{ needs.compile.outputs.tag }}
           name: ${{ github.event.inputs.bin }}
+          makeLatest: true
           prerelease: false
           allowUpdates: true
           replacesArtifacts: true

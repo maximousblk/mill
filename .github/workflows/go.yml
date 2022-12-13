@@ -79,6 +79,7 @@ jobs:
         with:
           tag: ${{ github.event.inputs.repo }}/${{ steps.release.outputs.tag }}
           name: ${{ github.event.inputs.repo }}@${{ github.event.inputs.ref }}
+          makeLatest: true
           prerelease: false
           allowUpdates: true
           replacesArtifacts: true
