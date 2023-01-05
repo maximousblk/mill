@@ -54,19 +54,19 @@ jobs:
         target: ["${{ github.event.inputs.target || 'x86_64-unknown-linux-gnu' }}"]
         include:
           - target: x86_64-unknown-linux-gnu
-            os: ubuntu-22.04
+            os: ubuntu-latest
           - target: aarch64-unknown-linux-gnu
-            os: ubuntu-22.04
+            os: ubuntu-latest
 
           - target: x86_64-pc-windows-msvc
-            os: windows-2022
+            os: windows-latest
           - target: aarch64-pc-windows-msvc
-            os: windows-2022
+            os: windows-latest
 
           - target: x86_64-apple-darwin
-            os: macos-12
+            os: macos-latest
           - target: aarch64-apple-darwin
-            os: macos-12
+            os: macos-latest
 
     steps:
       - name: Checkout repo
@@ -79,7 +79,7 @@ jobs:
 
       - name: Get commit hash # For release notes
         id: commit
-        run: echo "::set-output name=hash::$(git rev-parse --short HEAD)"
+        run: echo "hash=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
       - name: Setup Rust (${{ github.event.inputs.toolchain }})
         uses: actions-rs/toolchain@v1
@@ -121,7 +121,7 @@ jobs:
   release:
     if: always()
     needs: build
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     timeout-minutes: 10
 
     steps:
@@ -132,7 +132,7 @@ jobs:
         working-directory: release
         run: |
           echo 'source: ${{ github.event.inputs.repo }}@${{ needs.build.outputs.commit }}' | tee ../notes.md
-          echo -e '\n```sh\necho $hash  $filename | sha1sum -c\n' | tee -a ../notes.md
+          echo -e '\n```sh\necho $hash $filename | sha1sum -c\n' | tee -a ../notes.md
           sha1sum $(ls) | tee -a ../notes.md
           echo '```' | tee -a ../notes.md
 

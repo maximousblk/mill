@@ -28,7 +28,7 @@ on:
 jobs:
   compile:
     name: compile / ${{ matrix.target }}
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
 
     strategy:
       fail-fast: false
@@ -45,7 +45,7 @@ jobs:
 
       - name: get tag
         id: tag
-        run: echo "::set-output name=time::$(NO_COLOR=1 deno eval -p 'Date.now()')"
+        run: echo "time=$(NO_COLOR=1 deno eval -p 'Date.now()')" >> $GITHUB_OUTPUT
 
       - name: Pre-Build Steps
         id: prep
@@ -68,7 +68,7 @@ jobs:
   release:
     if: always()
     needs: compile
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     timeout-minutes: 10
 
     steps:
