@@ -20,6 +20,7 @@ on:
         description: "Zig build arguments"
         type: string
         required: false
+        default: "--verbose"
       optimize:
         description: "Optimization level"
         type: choice
@@ -165,7 +166,7 @@ jobs:
           sha1sum $(ls) | tee -a ../notes.md
           echo -e '```\n' | tee -a ../notes.md
           echo 'You can also verify the attestations by running following command:' | tee -a ../notes.md
-          echo -e '\n```sh\ngh attestation verify <artifact> --repo maximousblk/mill\n```\n' | tee -a ../notes.md
+          echo -e '\n```sh\ngh attestation verify --repo maximousblk/mill <path to zip file>\n```\n' | tee -a ../notes.md
 
       - name: Release
         uses: ncipollo/release-action@v1
