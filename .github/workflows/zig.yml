@@ -129,7 +129,7 @@ jobs:
       - name: Upload Builds
         uses: actions/upload-artifact@v4
         with:
-          name: zig-${{ github.run_id }}}-${{ needs.prep.outputs.name }}-${{ matrix.target }}
+          name: zig-${{ github.run_id }}-${{ needs.prep.outputs.name }}-${{ matrix.target }}
           path: zig-out/${{ needs.prep.outputs.name }}-${{ matrix.target }}.zip
           retention-days: 1
 
