@@ -161,7 +161,7 @@ jobs:
       - name: Prep Release Notes
         working-directory: artifacts
         run: |
-          echo 'source: ${{ github.event.inputs.repo }}@${{ needs.build.outputs.commit }}' | tee ../notes.md
+          echo 'source: [${{ github.event.inputs.repo }}@${{ needs.build.outputs.commit }}](https://github.com/${{ github.event.inputs.repo }}/tree/${{ needs.build.outputs.commit }})' | tee -a ../notes.md
           echo -e '\n```sh\necho $hash $filename | sha1sum -c\n' | tee -a ../notes.md
           sha1sum $(ls) | tee -a ../notes.md
           echo -e '```\n' | tee -a ../notes.md
