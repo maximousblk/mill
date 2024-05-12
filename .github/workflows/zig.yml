@@ -148,8 +148,8 @@ jobs:
       - name: Download Builds
         uses: actions/download-artifact@v4
         with:
-          name: zig-${{ github.run_id }}-${{ needs.prep.outputs.name }}-*
           path: artifacts
+          pattern: zig-${{ github.run_id }}-${{ needs.prep.outputs.name }}-*
           merge-multiple: true
 
       - name: Attest
