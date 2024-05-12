@@ -90,7 +90,7 @@ jobs:
       matrix:
         target: ${{ fromJson(needs.prep.outputs.targets) }}
 
-    runs-on: ${{ (contains(matrix.os, 'macos') && 'macos-latest') || (contains(matrix.os, 'windows') && 'windows-latest') || 'ubuntu-latest' }}
+    runs-on: ${{ (contains(matrix.target, 'macos') && 'macos-latest') || (contains(matrix.target, 'windows') && 'windows-latest') || 'ubuntu-latest' }}
 
     permissions:
       contents: write
