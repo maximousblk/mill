@@ -1,0 +1,176 @@
+name: Zig
+
+on:
+  workflow_dispatch:
+    inputs:
+      repo:
+        description: "Repository name"
+        type: string
+        required: true
+      ref:
+        description: "Branch or tag"
+        type: string
+        required: true
+        default: "main"
+      command:
+        description: "Zig build command"
+        type: string
+        required: false
+      args:
+        description: "Zig build arguments"
+        type: string
+        required: false
+      optimize:
+        description: "Optimization level"
+        type: choice
+        required: true
+        default: "ReleaseSafe"
+        options:
+          - Debug
+          - ReleaseSafe
+          - ReleaseFast
+          - ReleaseSmall
+      custom_target:
+        description: "Custom target"
+        type: string
+        required: false
+      os:
+        description: "Operating system"
+        type: string
+        required: true
+        default: "linux,macos,windows"
+      arch:
+        description: "Architecture"
+        type: string
+        required: true
+        default: "x86_64,aarch64"
+      zig_version:
+        description: "Zig version"
+        type: string
+        required: true
+        default: "master"
+
+jobs:
+  prep:
+    runs-on: ubuntu-latest
+
+    outputs:
+      name: ${{ steps.name.outputs.result }}
+      targets: ${{ steps.targets.outputs.result }}
+
+    steps:
+      - name: Get project name
+        id: name
+        uses: actions/github-script@v7
+        with:
+          result-encoding: string
+          script: return context.payload.inputs.repo.split('/').pop();
+
+      - name: Generate Target Matrix
+        id: targets
+        uses: actions/github-script@v7
+        with:
+          script: >
+            const os = context.payload.inputs.os.split(',').map(o => o.trim());
+            const arch = context.payload.inputs.arch.split(',').map(a => a.trim());
+            const matrix = os.flatMap(o => arch.map(a => `${a}-${o}`));
+
+            if (!context.payload.inputs.custom_target) return matrix.sort();
+            const custom_targets = context.payload.inputs.custom_target.split(',').map(t => t.trim());
+            return matrix.concat(custom_targets).sort();
+
+  build:
+    name: ${{ matrix.target }}
+
+    needs: prep
+
+    strategy:
+      fail-fast: false
+      matrix:
+        target: ${{ fromJson(needs.prep.outputs.targets) }}
+
+    runs-on: ${{ (contains(matrix.os, 'macos') && 'macos-latest') || (contains(matrix.os, 'windows') && 'windows-latest') || 'ubuntu-latest' }}
+
+    permissions:
+      contents: write
+
+    outputs:
+      commit: ${{ steps.commit.outputs.hash }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.ref }}
+          repository: ${{ github.event.inputs.repo }}
+          submodules: recursive
+          fetch-depth: 2
+
+      - name: Get commit hash # For release notes
+        id: commit
+        run: echo "hash=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Install Zig
+        uses: goto-bus-stop/setup-zig@v2
+
+      - name: Build
+        run: zig build ${{ github.event.inputs.command }} -Doptimize=${{ github.event.inputs.optimize }} -Dtarget=${{ matrix.target }} ${{ github.event.inputs.args }} --summary all
+
+      - name: Zip unix build
+        if: runner.os != 'Windows'
+        working-directory: zig-out
+        run: zip -r ${{ needs.prep.outputs.name }}-${{ matrix.target }}.zip .
+
+      - name: Zip windows build
+        if: runner.os == 'Windows'
+        working-directory: zig-out
+        run: Compress-Archive -Path . -DestinationPath ${{ needs.prep.outputs.name }}-${{ matrix.target }}.zip
+
+      - name: Upload Builds
+        uses: actions/upload-artifact@v4
+        with:
+          name: release
+          path: zig-out/${{ needs.prep.outputs.name }}-${{ matrix.target }}.zip
+          retention-days: 1
+
+  release:
+    if: always()
+    needs: [prep, build]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    permissions:
+      id-token: write
+      attestations: write
+
+    steps:
+      - name: Download Builds
+        uses: actions/download-artifact@v4
+
+      - name: Attest
+        uses: actions/attest-build-provenance@v1
+        with:
+          subject-path: ./release/*
+
+      - name: Prep Release Notes
+        working-directory: release
+        run: |
+          echo 'source: ${{ github.event.inputs.repo }}@${{ needs.build.outputs.commit }}' | tee ../notes.md
+          echo -e '\n```sh\necho $hash $filename | sha1sum -c\n' | tee -a ../notes.md
+          sha1sum $(ls) | tee -a ../notes.md
+          echo -e '```\n' | tee -a ../notes.md
+          echo 'You can also verify the attestations by running following command:' | tee -a ../notes.md
+          echo -e '\n```sh\ngh attestation verify <artifact> --repo maximousblk/mill\n```\n' | tee -a ../notes.md
+
+      - name: Release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ github.event.inputs.repo }}/${{ needs.build.outputs.commit }}
+          name: ${{ needs.prep.outputs.name }}@${{ github.event.inputs.ref }}
+          makeLatest: true
+          prerelease: false
+          allowUpdates: true
+          replacesArtifacts: true
+          artifacts: "release/*"
+          bodyFile: "notes.md"
+          token: ${{ secrets.GITHUB_TOKEN }}
