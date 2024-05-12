@@ -17,13 +17,12 @@ All the builds will be available as releases.
 
 List supported Languages:
 
+- [x] Zig
 - [x] Rust
 - [x] Go
 - [x] Deno
-- [ ] Node
-- [ ] C
-- [ ] C++
-- [ ] Run Build Command
+- [ ] Cmake (C/C++)
+- [ ] Arbitrary Build Command
 
 Some projects may not build properly if they require a special build process or environment.
 
