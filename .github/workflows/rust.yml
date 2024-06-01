@@ -112,7 +112,7 @@ jobs:
         run: Compress-Archive -Path ${{ github.event.inputs.bin }}.exe -DestinationPath ${{ github.event.inputs.bin }}-${{ matrix.target }}.zip
 
       - name: Upload Builds
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: release
           path: target/${{ matrix.target }}/release/${{ github.event.inputs.bin }}-${{ matrix.target }}.zip
