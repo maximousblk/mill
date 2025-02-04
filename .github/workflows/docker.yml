@@ -9,17 +9,18 @@ on:
       ref:
         description: 'Ref'
         required: true
+        default: 'main'
       name:
         description: 'Image Name'
         required: true
       context:
         description: 'Context'
         required: true
-        default: '.'
+        default: ''
       file:
         description: 'Dockerfile'
         required: true
-        default: 'Dockerfile'
+        default: ''
       platforms:
         description: 'Platforms'
         required: true
