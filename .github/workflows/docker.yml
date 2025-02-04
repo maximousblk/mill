@@ -5,24 +5,26 @@ on:
     inputs:
       repository:
         description: 'Repository'
+        type: string
         required: true
       ref:
         description: 'Ref'
+        type: string
         required: true
         default: 'main'
       name:
         description: 'Image Name'
+        type: string
         required: true
       context:
         description: 'Context'
-        required: true
-        default: ''
+        type: string
       file:
         description: 'Dockerfile'
-        required: true
-        default: ''
+        type: string
       platforms:
         description: 'Platforms'
+        type: string
         required: true
         default: 'linux/amd64,linux/arm64'
 
