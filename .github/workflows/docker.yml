@@ -44,7 +44,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
-          repository: ${{ github.repository }}
+          repository: ${{ inputs.repository }}
           ref: ${{ github.ref }}
 
       - name: Log in to the Container registry
