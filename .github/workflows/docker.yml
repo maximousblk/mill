@@ -74,8 +74,8 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           push: true
-          context: ${{ inputs.context }}
-          file: ${{ inputs.context }}/${{ inputs.file }}
+          # context: ${{ inputs.context }}
+          # file: ${{ inputs.context }}/${{ inputs.file }}
           platforms: ${{ inputs.platforms }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
