@@ -21,6 +21,7 @@ List supported Languages:
 - [x] Rust
 - [x] Go
 - [x] Deno
+- [x] Docker
 - [ ] Cmake (C/C++)
 - [ ] Arbitrary Build Command
 
