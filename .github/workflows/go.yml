@@ -21,7 +21,7 @@ on:
       args:
         description: GoReleaser Options
         required: false
-        default: '--snapshot --rm-dist'
+        default: '--snapshot --clean'
       prep:
         description: Pre-Build Steps
         required: false
@@ -59,7 +59,7 @@ jobs:
         run: ${{ github.event.inputs.prep }}
 
       - name: Build
-        uses: goreleaser/goreleaser-action@v5
+        uses: goreleaser/goreleaser-action@v6
         with:
           version: latest
           args: release ${{ github.event.inputs.args }}
