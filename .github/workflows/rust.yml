@@ -81,6 +81,20 @@ jobs:
           submodules: recursive
           fetch-depth: 2
 
+      - name: Setup Cargo Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ inputs.name }}-${{ matrix.target }}-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Run Setup sccache
+        uses: mozilla-actions/sccache-action@v0.0.8
+
       - name: Install ouch
         uses: taiki-e/cache-cargo-install-action@v2
         with:
