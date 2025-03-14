@@ -34,6 +34,10 @@ on:
       os:
         description: Custom OS
         required: false
+      extra_artifacts:
+        description: Extra Artifacts to Include
+        required: false
+        default: "README.md"
 
 env:
   CARGO_TERM_COLOR: always
@@ -107,7 +111,7 @@ jobs:
           args: --target ${{ matrix.target }} ${{ inputs.args }}
 
       - name: Create Release Bundle
-        run: ouch compress --slow target/${{ matrix.target }}/release/* README.md LICENSE ${{ inputs.name }}-${{ matrix.target }}.tar.gz
+        run: ouch compress --slow target/${{ matrix.target }}/release/* ${{ inputs.extra_artifacts }} ${{ inputs.name }}-${{ matrix.target }}.tar.gz
 
       - name: Upload Builds
         uses: actions/upload-artifact@v4
