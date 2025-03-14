@@ -9,18 +9,18 @@ on:
       ref:
         description: Branch or Tag
         required: false
-        default: 'main'
-      bin:
-        description: Binary Name
+        default: "main"
+      name:
+        description: Project Name
         required: true
       toolchain:
         description: Rust Version
         required: false
-        default: 'stable'
+        default: "stable"
       args:
         description: Build Options
         required: false
-        default: '--locked --release'
+        default: "--locked --release"
       prep:
         description: Pre-Build Steps
         required: false
@@ -50,8 +50,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ["${{ github.event.inputs.os || 'ubuntu-22.04' }}"]
-        target: ["${{ github.event.inputs.target || 'x86_64-unknown-linux-gnu' }}"]
+        os: ["${{ inputs.os || 'ubuntu-22.04' }}"]
+        target: ["${{ inputs.target || 'x86_64-unknown-linux-gnu' }}"]
         include:
           - target: x86_64-unknown-linux-gnu
             os: ubuntu-latest
@@ -72,51 +72,51 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.inputs.ref }}
-          repository: ${{ github.event.inputs.repo }}
+          ref: ${{ inputs.ref }}
+          repository: ${{ inputs.repo }}
           submodules: recursive
           fetch-depth: 2
+
+      - name: Install ouch
+        uses: taiki-e/cache-cargo-install-action@v2
+        with:
+          tool: ouch
 
       - name: Get commit hash # For release notes
         id: commit
         run: echo "hash=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
-      - name: Setup Rust (${{ github.event.inputs.toolchain }})
+      - name: Setup Rust (${{ inputs.toolchain }})
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: ${{ github.event.inputs.toolchain }}
+          toolchain: ${{ inputs.toolchain }}
           target: ${{ matrix.target }}
           override: true
           default: true
 
       - name: Pre-Build Steps
         id: prep
-        if: contains(github.event.inputs.preptargets, matrix.target)
-        run: ${{ github.event.inputs.prep }}
+        if: contains(inputs.preptargets, matrix.target)
+        run: ${{ inputs.prep }}
 
-      - name: Build ${{ github.event.inputs.bin }}
+      - name: Build ${{ inputs.name }}
         uses: actions-rs/cargo@v1
         with:
           use-cross: ${{ !contains(matrix.target, 'x86_64') }}
           command: build
-          args: --target ${{ matrix.target }} ${{ github.event.inputs.args }}
+          args: --target ${{ matrix.target }} ${{ inputs.args }}
 
-      - name: Zip unix build
-        if: runner.os != 'Windows'
-        working-directory: target/${{ matrix.target }}/release
-        run: zip -r ${{ github.event.inputs.bin }}-${{ matrix.target }}.zip ${{ github.event.inputs.bin }}
-
-      - name: Zip windows build
-        if: runner.os == 'Windows'
-        working-directory: target/${{ matrix.target }}/release
-        run: Compress-Archive -Path ${{ github.event.inputs.bin }}.exe -DestinationPath ${{ github.event.inputs.bin }}-${{ matrix.target }}.zip
+      - name: Create Release Bundle
+        run: ouch compress --slow target/${{ matrix.target }}/release/* README.md LICENSE ${{ inputs.name }}-${{ matrix.target }}.tar.gz
 
       - name: Upload Builds
         uses: actions/upload-artifact@v4
         with:
-          name: release
-          path: target/${{ matrix.target }}/release/${{ github.event.inputs.bin }}-${{ matrix.target }}.zip
           retention-days: 1
+          include-hidden-files: true
+          compression-level: 0
+          name: build-${{ matrix.target }}
+          path: ${{ inputs.name }}-${{ matrix.target }}.tar.gz
 
   release:
     if: always()
@@ -124,27 +124,51 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
+    permissions:
+      contents: write
+      packages: write
+      actions: write
+      id-token: write
+      attestations: write
+
     steps:
+      - uses: actions/upload-artifact/merge@v4
+        with:
+          name: release
+          pattern: "build-*"
+          separate-directories: false
+          delete-merged: false
+          retention-days: 1
+
       - name: Download Builds
         uses: actions/download-artifact@v4
+        with:
+          name: release
+          path: release
+          merge-multiple: true
 
       - name: Prep Release Notes
         working-directory: release
         run: |
-          echo 'source: ${{ github.event.inputs.repo }}@${{ needs.build.outputs.commit }}' | tee ../notes.md
+          echo 'source: ${{ inputs.repo }}@${{ needs.build.outputs.commit }}' | tee ../notes.md
           echo -e '\n```sh\necho $hash $filename | sha1sum -c\n' | tee -a ../notes.md
           sha1sum $(ls) | tee -a ../notes.md
           echo '```' | tee -a ../notes.md
 
+      - name: Generate Provenance Attestation
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: 'release/*'
+
       - name: Release
         uses: ncipollo/release-action@v1
         with:
-          tag: ${{ github.event.inputs.repo }}/${{ needs.build.outputs.commit }}
-          name: ${{ github.event.inputs.bin }}@${{ github.event.inputs.ref }}
+          tag: ${{ inputs.repo }}/${{ needs.build.outputs.commit }}
+          name: ${{ inputs.name }}@${{ inputs.ref }}
           makeLatest: true
           prerelease: false
           allowUpdates: true
           replacesArtifacts: true
-          artifacts: 'release/*'
-          bodyFile: 'notes.md'
-          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: "release/*"
+          bodyFile: "notes.md"
+          token: ${{ github.token }}

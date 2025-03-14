@@ -53,7 +53,7 @@ jobs:
         run: ${{ github.event.inputs.prep }}
 
       - name: Compile
-        run: deno compile ${{ github.event.inputs.perms }} ${{ github.event.inputs.args }} --target ${{ matrix.target }} --output ${{ github.event.inputs.bin }} ${{ github.event.inputs.entry }}
+        run: deno compile ${{ github.event.inputs.args }} --target ${{ matrix.target }} --output ${{ github.event.inputs.bin }} ${{ github.event.inputs.entry }}
 
       - name: zip binary
         run: ls -a && zip -r ${{ github.event.inputs.bin }}-${{ matrix.target }}.zip ./${{ github.event.inputs.bin }}*
