@@ -32,12 +32,6 @@ on:
       preptargets:
         description: Targets for Pre-Build Steps
         required: false
-      target:
-        description: Custom Target
-        required: false
-      os:
-        description: Custom OS
-        required: false
       extra_artifacts:
         description: Extra Artifacts to Include
         required: false
@@ -58,8 +52,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ["${{ inputs.os || 'ubuntu-22.04' }}"]
-        target: ["${{ inputs.target || 'x86_64-unknown-linux-gnu' }}"]
         include:
           - target: x86_64-unknown-linux-gnu
             os: ubuntu-24.04
