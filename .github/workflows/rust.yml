@@ -58,19 +58,19 @@ jobs:
         target: ["${{ inputs.target || 'x86_64-unknown-linux-gnu' }}"]
         include:
           - target: x86_64-unknown-linux-gnu
-            os: ubuntu-latest
+            os: ubuntu-24.04
           - target: aarch64-unknown-linux-gnu
-            os: ubuntu-latest
+            os: ubuntu-24.04-arm
 
           - target: x86_64-pc-windows-msvc
-            os: windows-latest
+            os: windows-2025
           - target: aarch64-pc-windows-msvc
-            os: windows-latest
+            os: windows-11-arm
 
           - target: x86_64-apple-darwin
-            os: macos-latest
+            os: macos-13
           - target: aarch64-apple-darwin
-            os: macos-latest
+            os: macos-15
 
     steps:
       - name: Checkout repo
