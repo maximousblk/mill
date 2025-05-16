@@ -127,7 +127,7 @@ jobs:
         run: ${{ inputs.prep }}
 
       - name: Install ${{ inputs.name }}
-        run: cargo install --target ${{ matrix.target }} --path . --root target/${{ github.run_id }}_install_root/${{ inputs.name }} ${{ inputs.args }}
+        run: cargo install --target ${{ matrix.target }} --path . --root target/${{ github.run_id }}_install_root/${{ inputs.name }} ${{ inputs.name }} ${{ inputs.args }}
         shell: bash
 
       - name: Create Release Bundle
