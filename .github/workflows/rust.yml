@@ -20,7 +20,7 @@ on:
       args:
         description: Build Options
         required: false
-        default: "--locked --release"
+        default: "--locked"
       prep:
         description: Pre-Build Steps
         required: false
