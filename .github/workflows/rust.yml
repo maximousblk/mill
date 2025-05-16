@@ -93,7 +93,7 @@ jobs:
           key: ${{ inputs.name }}-${{ matrix.target }}-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Run Setup sccache
-        uses: mozilla-actions/sccache-action@v0.0.8
+        uses: mozilla-actions/sccache-action@v0.0.9
 
       - name: Install ouch
         uses: taiki-e/cache-cargo-install-action@v2
