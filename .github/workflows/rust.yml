@@ -104,12 +104,6 @@ jobs:
         id: commit
         run: echo "hash=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
-      # - name: Setup Rust (${{ inputs.toolchain }})
-      #   run: |
-      #     rustup toolchain install ${{ inputs.toolchain }} --profile minimal --no-self-update
-      #     rustup default ${{ inputs.toolchain }}
-      #     rustup target add ${{ matrix.target }}
-
       - name: Setup Rust (${{ inputs.toolchain }})
         env:
           TOOLCHAIN: ${{ inputs.toolchain }}
@@ -132,12 +126,16 @@ jobs:
         if: contains(inputs.preptargets, matrix.target)
         run: ${{ inputs.prep }}
 
-      - name: Build ${{ inputs.name }}
-        run: cargo build --target ${{ matrix.target }} ${{ inputs.args }}
+      - name: Install ${{ inputs.name }}
+        run: cargo install --target ${{ matrix.target }} --path . --root target/${{ github.run_id }}_install_root/${{ inputs.name }} ${{ inputs.args }}
         shell: bash
 
       - name: Create Release Bundle
-        run: ouch compress --slow target/${{ matrix.target }}/release ${{ inputs.extra_artifacts }} ${{ inputs.name }}-${{ matrix.target }}.tar.gz
+        shell: bash
+        run: |
+          cp -r ${{ inputs.extra_artifacts }} target/${{ github.run_id }}_install_root/${{ inputs.name }}
+          ouch compress --yes --slow target/${{ github.run_id }}_install_root/${{ inputs.name }} ${{ inputs.name }}-${{ matrix.target }}.tar.gz
+          ouch list ${{ inputs.name }}-${{ matrix.target }}.tar.gz
 
       - name: Upload Builds
         uses: actions/upload-artifact@v4
