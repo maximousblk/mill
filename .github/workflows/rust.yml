@@ -10,9 +10,13 @@ on:
         description: Branch or Tag
         required: false
         default: "main"
-      name:
-        description: Crate Name
+      bin:
+        description: Binary Name
         required: true
+      manifest_dir:
+        description: Manifest Directory
+        required: false
+        default: "."
       toolchain:
         description: Rust Version
         required: false
@@ -90,10 +94,11 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
             target/
-          key: ${{ inputs.name }}-${{ matrix.target }}-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ inputs.bin }}-${{ matrix.target }}-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Run Setup sccache
         uses: mozilla-actions/sccache-action@v0.0.9
+        continue-on-error: true
 
       - name: Install ouch
         uses: taiki-e/cache-cargo-install-action@v2
@@ -126,16 +131,16 @@ jobs:
         if: contains(inputs.preptargets, matrix.target)
         run: ${{ inputs.prep }}
 
-      - name: Install ${{ inputs.name }}
-        run: cargo install --target ${{ matrix.target }} --path . --root target/${{ github.run_id }}_install_root/${{ inputs.name }} ${{ inputs.name }} ${{ inputs.args }}
+      - name: Install ${{ inputs.bin }}
+        run: cargo install --target ${{ matrix.target }} --path ${{ inputs.manifest_dir }} --root ${{ github.workspace }}/${{ github.run_id }}_install_root/${{ inputs.bin }} --bin ${{ inputs.bin }} ${{ inputs.args }}
         shell: bash
 
       - name: Create Release Bundle
         shell: bash
         run: |
-          cp -r ${{ inputs.extra_artifacts }} target/${{ github.run_id }}_install_root/${{ inputs.name }}
-          ouch compress --yes --slow target/${{ github.run_id }}_install_root/${{ inputs.name }} ${{ inputs.name }}-${{ matrix.target }}.tar.gz
-          ouch list ${{ inputs.name }}-${{ matrix.target }}.tar.gz
+          cp -r ${{ inputs.extra_artifacts }} ${{ github.workspace }}/${{ github.run_id }}_install_root/${{ inputs.bin }}
+          ouch compress --yes --slow ${{ github.workspace }}/${{ github.run_id }}_install_root/${{ inputs.bin }} ${{ inputs.bin }}-${{ matrix.target }}.tar.gz
+          ouch list ${{ inputs.bin }}-${{ matrix.target }}.tar.gz
 
       - name: Upload Builds
         uses: actions/upload-artifact@v4
@@ -144,7 +149,7 @@ jobs:
           include-hidden-files: true
           compression-level: 0
           name: build-${{ matrix.target }}
-          path: ${{ inputs.name }}-${{ matrix.target }}.tar.gz
+          path: ${{ inputs.bin }}-${{ matrix.target }}.tar.gz
 
   release:
     if: always()
@@ -183,7 +188,7 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           tag: ${{ inputs.repo }}/${{ needs.build.outputs.commit }}
-          name: ${{ inputs.name }}@${{ inputs.ref }}
+          name: ${{ inputs.bin }}@${{ inputs.ref }}
           makeLatest: true
           prerelease: false
           allowUpdates: true
