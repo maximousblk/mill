@@ -11,7 +11,7 @@ on:
         required: false
         default: "main"
       name:
-        description: Project Name
+        description: Crate Name
         required: true
       toolchain:
         description: Rust Version
@@ -46,7 +46,7 @@ jobs:
   build:
     name: ${{ matrix.target }}
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 60
+    # timeout-minutes: 60
 
     outputs:
       commit: ${{ steps.commit.outputs.hash }}
@@ -104,13 +104,28 @@ jobs:
         id: commit
         run: echo "hash=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
+      # - name: Setup Rust (${{ inputs.toolchain }})
+      #   run: |
+      #     rustup toolchain install ${{ inputs.toolchain }} --profile minimal --no-self-update
+      #     rustup default ${{ inputs.toolchain }}
+      #     rustup target add ${{ matrix.target }}
+
       - name: Setup Rust (${{ inputs.toolchain }})
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: ${{ inputs.toolchain }}
-          target: ${{ matrix.target }}
-          override: true
-          default: true
+        env:
+          TOOLCHAIN: ${{ inputs.toolchain }}
+          TARGET: ${{ matrix.target }}
+        run: |
+          rustup toolchain install ${{ env.TOOLCHAIN }} --force-non-host
+          rustup set profile default
+          rustup default ${{ env.TOOLCHAIN }}
+          rustup override set ${{ env.TOOLCHAIN }}
+          rustup target add ${{ env.TARGET }} --toolchain ${{ env.TOOLCHAIN }}
+          rustup show active-toolchain
+
+          rustc -V
+          cargo -V
+          rustup -V
+
 
       - name: Pre-Build Steps
         id: prep
@@ -118,11 +133,8 @@ jobs:
         run: ${{ inputs.prep }}
 
       - name: Build ${{ inputs.name }}
-        uses: actions-rs/cargo@v1
-        with:
-          use-cross: ${{ !contains(matrix.target, 'x86_64') }}
-          command: build
-          args: --target ${{ matrix.target }} ${{ inputs.args }}
+        run: cargo build --target ${{ matrix.target }} ${{ inputs.args }}
+        shell: bash
 
       - name: Create Release Bundle
         run: ouch compress --slow target/${{ matrix.target }}/release ${{ inputs.extra_artifacts }} ${{ inputs.name }}-${{ matrix.target }}.tar.gz
