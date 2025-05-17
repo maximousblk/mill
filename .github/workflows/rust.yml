@@ -49,6 +49,10 @@ jobs:
     outputs:
       commit: ${{ steps.commit.outputs.hash }}
 
+    defaults:
+      run:
+        shell: nu {0}
+
     strategy:
       fail-fast: false
       matrix:
@@ -69,6 +73,11 @@ jobs:
             os: macos-15
 
     steps:
+      - name: Install Nushell
+        uses: hustcer/setup-nu@v3.19
+        with:
+          version: "0.104.0"
+
       - name: Checkout repo
         uses: actions/checkout@v4
         with:
@@ -102,7 +111,7 @@ jobs:
 
       - name: Get commit hash # For release notes
         id: commit
-        run: echo "hash=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+        run: $"hash=(git rev-parse --short HEAD)" | save -a $env.GITHUB_OUTPUT
 
       - name: Setup Rust (${{ inputs.toolchain }})
         env:
@@ -127,14 +136,12 @@ jobs:
 
       - name: Install ${{ inputs.bin }}
         run: cargo install --target ${{ matrix.target }} --path ${{ inputs.manifest_dir }} --root ${{ github.workspace }}/${{ github.run_id }}_install_root/${{ inputs.bin }} --bin ${{ inputs.bin }} ${{ inputs.args }}
-        shell: bash
 
       - name: Create Release Bundle
-        shell: bash
         run: |
-          cp -r ${{ inputs.extra_artifacts }} ${{ github.workspace }}/${{ github.run_id }}_install_root/${{ inputs.bin }}
-          ouch compress --yes --slow ${{ github.workspace }}/${{ github.run_id }}_install_root/${{ inputs.bin }} ${{ inputs.bin }}-${{ matrix.target }}.tar.gz
-          ouch list ${{ inputs.bin }}-${{ matrix.target }}.tar.gz
+          cp -r ${{ inputs.extra_artifacts }} '${{ github.workspace }}/${{ github.run_id }}_install_root/${{ inputs.bin }}/'
+          ouch compress --yes --slow '${{ github.workspace }}/${{ github.run_id }}_install_root/${{ inputs.bin }}/' '${{ inputs.bin }}-${{ matrix.target }}.tar.gz'
+          ouch list '${{ inputs.bin }}-${{ matrix.target }}.tar.gz'
 
       - name: Upload Builds
         uses: actions/upload-artifact@v4
@@ -148,7 +155,7 @@ jobs:
   release:
     if: always()
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
 
     permissions:
