@@ -79,31 +79,23 @@ jobs:
         with:
           version: "0.104.0"
 
+      - name: Configure Git
+        run: git config --global core.longpaths true
+
       - name: Checkout repo
         uses: actions/checkout@v4
         with:
           ref: ${{ inputs.ref }}
           repository: ${{ inputs.repo }}
           submodules: recursive
-          fetch-depth: 2
+          fetch-depth: 1
 
-      - name: Configure Git
-        run: git config --global core.longpaths true
-
-      - name: Setup Cargo Cache
-        uses: actions/cache@v4
+      - name: Setup Rust Toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          path: |
-            ~/.cargo/bin/
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-            target/
-          key: ${{ inputs.bin }}-${{ matrix.target }}-${{ hashFiles('**/Cargo.lock') }}
-
-      - name: Run Setup sccache
-        uses: mozilla-actions/sccache-action@v0.0.9
-        continue-on-error: true
+          toolchain: ${{ inputs.toolchain }}
+          target: ${{ matrix.target }}
+          override: true
 
       - name: Install ouch
         uses: taiki-e/cache-cargo-install-action@v2
@@ -113,22 +105,6 @@ jobs:
       - name: Get commit hash # For release notes
         id: commit
         run: $"hash=(git rev-parse --short HEAD)" | save -a $env.GITHUB_OUTPUT
-
-      - name: Setup Rust (${{ inputs.toolchain }})
-        env:
-          TOOLCHAIN: ${{ inputs.toolchain }}
-          TARGET: ${{ matrix.target }}
-        run: |
-          rustup toolchain install ${{ env.TOOLCHAIN }} --force-non-host
-          rustup set profile default
-          rustup default ${{ env.TOOLCHAIN }}
-          rustup override set ${{ env.TOOLCHAIN }}
-          rustup target add ${{ env.TARGET }} --toolchain ${{ env.TOOLCHAIN }}
-          rustup show active-toolchain
-
-          rustc -V
-          cargo -V
-          rustup -V
 
       - name: Pre-Build Steps
         id: prep
