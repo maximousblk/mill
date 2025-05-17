@@ -1,5 +1,5 @@
 name: Rust
-run-name: ${{ inputs.repo }}@${{ inputs.ref }} / ${{ inputs.bin }}
+run-name: ${{ inputs.repo }}@${{ inputs.ref }}/${{ inputs.bin }}
 
 on:
   workflow_dispatch:
