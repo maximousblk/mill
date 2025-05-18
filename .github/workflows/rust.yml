@@ -95,6 +95,7 @@ jobs:
         with:
           toolchain: ${{ inputs.toolchain }}
           target: ${{ matrix.target }}
+          rustflags: ""
           override: true
 
       - name: Install ouch
