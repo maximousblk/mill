@@ -48,7 +48,7 @@ jobs:
         with:
           fetch-depth: 1
           repository: ${{ inputs.repository }}
-          ref: ${{ github.ref }}
+          ref: ${{ inputs.ref }}
 
       - name: Log in to the Container registry
         uses: docker/login-action@v3
