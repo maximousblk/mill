@@ -19,9 +19,13 @@ on:
       context:
         description: 'Context'
         type: string
+        required: true
+        default: '.'
       file:
         description: 'Dockerfile'
         type: string
+        required: true
+        default: 'Dockerfile'
       platforms:
         description: 'Platforms'
         type: string
