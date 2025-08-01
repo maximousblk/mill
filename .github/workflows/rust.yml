@@ -75,7 +75,7 @@ jobs:
 
     steps:
       - name: Install Nushell
-        uses: hustcer/setup-nu@v3.19
+        uses: hustcer/setup-nu@v3.20
         with:
           version: "0.104.0"
 
