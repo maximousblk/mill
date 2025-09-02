@@ -147,7 +147,7 @@ jobs:
 
     steps:
       - name: Download Builds
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           path: artifacts
           pattern: zig-${{ github.run_id }}-${{ needs.prep.outputs.name }}-*
