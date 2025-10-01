@@ -62,14 +62,14 @@ jobs:
     steps:
       - name: Get project name
         id: name
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           result-encoding: string
           script: return context.payload.inputs.repo.split('/').pop();
 
       - name: Generate Target Matrix
         id: targets
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: >
             const os = context.payload.inputs.os.split(',').map(o => o.trim());
