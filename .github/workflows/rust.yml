@@ -122,7 +122,7 @@ jobs:
           ouch list '${{ inputs.bin }}-${{ matrix.target }}.tar.gz'
 
       - name: Upload Builds
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           retention-days: 1
           include-hidden-files: true
